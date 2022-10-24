@@ -17,13 +17,28 @@ const gameBoard = (() => {
 
 const Player = (symbol, name) => {
 
-    return {symbol};
+    return {symbol, name};
 }
 
 const gameController = (() => {
-    const currentPlayer = Player('X', 'player1');
+    let players = [Player('X', 'player1'), Player('O', 'player2')];
+    let currentPlayer = players[0];
+    let gameOver = false;
 
-    return {currentPlayer};
+    const changePlayer = () => {
+        if (currentPlayer === players[0]) {
+            currentPlayer = players[1];
+        } else {
+            currentPlayer = players[0];
+        }
+        console.log(currentPlayer.symbol);
+    }
+
+    const getcurrentSymbol = () => {
+       return currentPlayer.symbol;
+    }
+
+    return {currentPlayer, changePlayer, getcurrentSymbol};
 })();
 
 const displayController = (() => {
@@ -40,10 +55,12 @@ const displayController = (() => {
     squares.forEach(square => {
         square.addEventListener('click', function(){
             if (this.innerHTML === '')  {
-                this.innerHTML = gameController.currentPlayer.symbol;
-                gameBoard.addSymbol(gameController.currentPlayer.symbol, Number(this.id));
+                this.innerHTML = gameController.getcurrentSymbol();
+                console.log(gameController.changePlayer.symbol);
+                gameBoard.addSymbol(gameController.getcurrentSymbol(), Number(this.id));
+                gameController.changePlayer();
             }
         })
     })
-    return { printBoard };
+    return { };
 })();
