@@ -9,10 +9,51 @@ const gameBoard = (() => {
 
     const boardAtIndex = (index) => board[index];
 
+    const boardFull = () => !(board.includes(''));
+
     const clear = () => board.fill('');
 
+    const checkCols = () => {
+        let threeInARow = false;
+        for (let i = 0; i < 3; i++) {
+            if (board[i] === board[i + 3] && board[i] === board[i + 6] && board[i] !== '') {
+                threeInARow = true;
+            } 
+        }
+        return threeInARow;
+    }
 
-    return { board, boardAtIndex, clear, addSymbol };
+    const checkRows = () => {
+        let threeInARow = false;
+        for (let i = 0; i < 7; i+=3) {
+            if (board[i] === board[i + 1] && board[i] === board[i + 2] && board[i] !== '') {
+                threeInARow = true;
+            }
+        }
+        return threeInARow;
+    }
+
+    const checkDiagonals = () => {
+        let threeInARow = false
+        if (board[0] == board[4] && board[0] == board[8] && board[0] !== '') {
+            threeInARow = true;
+        } else if (board[2] == board[4] && board[2] == board[6] && board[2] !== '') {
+            threeInARow = true;
+        }
+        return threeInARow;
+    }
+
+
+    return { 
+        board, 
+        boardAtIndex, 
+        clear, 
+        addSymbol, 
+        boardFull, 
+        checkCols, 
+        checkRows, 
+        checkDiagonals 
+    };
 })();
 
 const Player = (symbol, name) => {
@@ -23,7 +64,6 @@ const Player = (symbol, name) => {
 const gameController = (() => {
     let players = [Player('X', 'player1'), Player('O', 'player2')];
     let currentPlayer = players[0];
-    let gameOver = false;
 
     const changePlayer = () => {
         if (currentPlayer === players[0]) {
@@ -31,14 +71,28 @@ const gameController = (() => {
         } else {
             currentPlayer = players[0];
         }
-        console.log(currentPlayer.symbol);
+    }
+    
+    const checkForGameOver = () => {
+        if (gameBoard.boardFull()) {
+            return true;
+        } else if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
+             return true;
+        } else {
+            return false;
+        }
     }
 
     const getcurrentSymbol = () => {
        return currentPlayer.symbol;
     }
 
-    return {currentPlayer, changePlayer, getcurrentSymbol};
+    return {
+
+        changePlayer, 
+        getcurrentSymbol, 
+        checkForGameOver 
+    };
 })();
 
 const displayController = (() => {
@@ -56,9 +110,9 @@ const displayController = (() => {
         square.addEventListener('click', function(){
             if (this.innerHTML === '')  {
                 this.innerHTML = gameController.getcurrentSymbol();
-                console.log(gameController.changePlayer.symbol);
                 gameBoard.addSymbol(gameController.getcurrentSymbol(), Number(this.id));
                 gameController.changePlayer();
+                gameController.checkForGameOver();
             }
         })
     })
