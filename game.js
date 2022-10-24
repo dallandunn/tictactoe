@@ -28,12 +28,21 @@ const gameController = (() => {
 
 const displayController = (() => {
     const squares = document.querySelectorAll('.square');
+    const reset = document.getElementById('reset');
+
+    reset.addEventListener('click', () => {
+        gameBoard.clear();
+        squares.forEach(square => {
+            square.innerHTML = '';
+        })
+    });
 
     squares.forEach(square => {
         square.addEventListener('click', function(){
-            this.innerHTML = gameController.currentPlayer.symbol;
-            gameBoard.addSymbol(gameController.currentPlayer.symbol, Number(this.id));
-            console.log(gameBoard.board)
+            if (this.innerHTML === '')  {
+                this.innerHTML = gameController.currentPlayer.symbol;
+                gameBoard.addSymbol(gameController.currentPlayer.symbol, Number(this.id));
+            }
         })
     })
     return { printBoard };
