@@ -2,35 +2,39 @@ const gameBoard = (() => {
     let board = new Array(9).fill('')
     
     const addSymbol = (symbol, location) => {
-        if(board[location] = '') {
+        if(board[location] === '') {
             board[location] = symbol;
         }
     }
 
-    const getBoardAt = (index) => board[index];
-
-    board[2] = 'X';
-    board[8] = 'O'
+    const boardAtIndex = (index) => board[index];
 
     const clear = () => board.fill('');
 
-    return { getBoardAt, clear, addSymbol };
+
+    return { board, boardAtIndex, clear, addSymbol };
 })();
 
-const player = (symbol, name) => {
-    const placeSymbol = (position) => {
-        console.log(position);
-    }
+const Player = (symbol, name) => {
 
-    return { symbol, name };
+    return {symbol};
 }
 
-function printBoard() {
-    const board = document.getElementById('board');
-    console.log(board.childElementCount);
-    for (var i = 0; i < board.childElementCount; i++) {
-        board.children[i].innerHTML = gameBoard.getBoardAt(i);
-    }
-}
+const gameController = (() => {
+    const currentPlayer = Player('X', 'player1');
 
-printBoard();
+    return {currentPlayer};
+})();
+
+const displayController = (() => {
+    const squares = document.querySelectorAll('.square');
+
+    squares.forEach(square => {
+        square.addEventListener('click', function(){
+            this.innerHTML = gameController.currentPlayer.symbol;
+            gameBoard.addSymbol(gameController.currentPlayer.symbol, Number(this.id));
+            console.log(gameBoard.board)
+        })
+    })
+    return { printBoard };
+})();
