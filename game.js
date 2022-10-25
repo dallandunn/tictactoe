@@ -58,11 +58,15 @@ const gameBoard = (() => {
 
 const Player = (symbol, name) => {
 
-    return {symbol, name};
+    const placeSymbol = (index) => {
+        gameBoard.addSymbol(symbol, index);
+    }
+
+    return {symbol, name, placeSymbol};
 }
 
 const gameController = (() => {
-    let players = [Player('X', 'player1'), Player('O', 'player2')];
+    let players = [Player('X', document.getElementById('x').value), Player('O', document.getElementById('o').value)];
     let currentPlayer = players[0];
 
     const changePlayer = () => {
@@ -75,22 +79,25 @@ const gameController = (() => {
     
     const checkForGameOver = () => {
         if (gameBoard.boardFull()) {
-            return true;
-        } else if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
-             return true;
-        } else {
+            displayController.displayWinner("Game Over. It's a tie.");
+            currentPlayer = players[0];
             return false;
+        } else if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
+            displayController.displayWinner(currentPlayer.name + ' is the Winner!');
+            currentPlayer = players[0];
+            return false;
+        } else {
+            return true;
         }
     }
 
-    const getcurrentSymbol = () => {
-       return currentPlayer.symbol;
+    const getCurrentPlayer = () => {
+       return currentPlayer;
     }
 
     return {
-
         changePlayer, 
-        getcurrentSymbol, 
+        getCurrentPlayer, 
         checkForGameOver 
     };
 })();
@@ -98,9 +105,17 @@ const gameController = (() => {
 const displayController = (() => {
     const squares = document.querySelectorAll('.square');
     const reset = document.getElementById('reset');
+    const winner = document.getElementById('winner');
+
+    const displayWinner = (message) => {
+        winner.innerText = message;
+        reset.innerText = 'Play Again'
+    }
 
     reset.addEventListener('click', () => {
         gameBoard.clear();
+        displayWinner(' ');
+        reset.innerHTML = 'Reset'
         squares.forEach(square => {
             square.innerHTML = '';
         })
@@ -108,13 +123,16 @@ const displayController = (() => {
 
     squares.forEach(square => {
         square.addEventListener('click', function(){
-            if (this.innerHTML === '')  {
-                this.innerHTML = gameController.getcurrentSymbol();
-                gameBoard.addSymbol(gameController.getcurrentSymbol(), Number(this.id));
-                gameController.changePlayer();
+            if (this.innerHTML === '' && gameController.checkForGameOver())  {
+                this.innerHTML = gameController.getCurrentPlayer().symbol;
+
+                gameController.getCurrentPlayer().placeSymbol(Number(this.id));
                 gameController.checkForGameOver();
+                gameController.changePlayer();
             }
         })
     })
-    return { };
+    return {
+        displayWinner
+    };
 })();

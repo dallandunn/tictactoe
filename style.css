@@ -19,7 +19,7 @@ body {
     display: grid;
     grid-template-rows: repeat(3, 1fr);
     grid-template-columns: repeat(3, 100px);
-    margin-top: 200px;
+    margin-top: 50px;
     color: white;
 }
 
@@ -50,4 +50,17 @@ body {
     -webkit-box-shadow:0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     -moz-box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
+}
+
+#winner {
+    font-size: 48px;
+    color: white;
+    height: 50px;
+}
+
+.players {
+    margin-top: 50px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
 }
