@@ -4,7 +4,8 @@ html {
 }
 
 div {
-    border: 1px solid white;
+    /* border: 1px solid white; */
+    margin: 0;
 }
 
 body {
@@ -43,10 +44,11 @@ body {
     text-align: center;
     font-size: 90px;
     cursor: pointer;
+    border: 3px solid white;
 }
 
 .square:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.5);
     -webkit-box-shadow:0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     -moz-box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
@@ -63,4 +65,30 @@ body {
     background-color: white;
     display: flex;
     flex-direction: column;
+}
+
+.top {
+    border-top: none;
+}
+
+.bottom {
+    border-bottom: none;
+}
+
+.left {
+    border-left: none;
+}
+
+.right {
+    border-right: none;
+}
+
+.middle {
+    border-top: none;
+    border-bottom: none;
+}
+
+.center {
+    border-left: none;
+    border-right: none;
 }
