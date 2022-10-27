@@ -56,17 +56,49 @@ const gameBoard = (() => {
     };
 })();
 
-const Player = (symbol, name) => {
+const Player = (symbol, name, playerType) => {
 
     const placeSymbol = (index) => {
         gameBoard.addSymbol(symbol, index);
     }
 
-    return {symbol, name, placeSymbol};
+    const getSymbol = () => symbol;
+
+    const getName = () => name;
+
+    return {getSymbol, getName, placeSymbol};
+}
+
+const AI = (symbol, name, difficulty) => {
+    const {getName} = Player(symbol, name);
+    const {getSymbol} = Player(symbol, name);
+
+    const placeSymbol = () => {
+        if (!(gameController.checkForGameOver())) {
+            return ''
+        }
+        const square = selectSquare(difficulty);
+        gameBoard.addSymbol(symbol, square);
+        document.getElementById(square.toString()).innerText = symbol;
+    }
+
+    const selectSquare = (difficulty) => {
+        let selection;
+        if (difficulty === 'easy') {
+            do {
+                selection = Math.floor(Math.random()  *  10);
+            } while (gameBoard.boardAtIndex(selection) !== '');
+        }
+        
+        return selection;
+    }
+
+    return {placeSymbol, getName, getSymbol};
 }
 
 const gameController = (() => {
-    let players = [Player('X', document.getElementById('x').value), Player('O', document.getElementById('o').value)];
+    // let players = [Player('X', document.getElementById('x').value), Player('O', document.getElementById('o').value)];
+    let players = [Player('X', document.getElementById('x').value), AI('O', 'AI', 'easy')]
     let currentPlayer = players[0];
 
     const changePlayer = () => {
@@ -78,12 +110,12 @@ const gameController = (() => {
     }
     
     const checkForGameOver = () => {
-        if (gameBoard.boardFull()) {
-            displayController.displayWinner("Game Over. It's a tie.");
+        if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
+            displayController.displayWinner(currentPlayer.getName() + ' is the Winner!');
             currentPlayer = players[0];
             return false;
-        } else if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
-            displayController.displayWinner(currentPlayer.name + ' is the Winner!');
+        } else if (gameBoard.boardFull()) {
+            displayController.displayWinner("Game Over. It's a tie.");
             currentPlayer = players[0];
             return false;
         } else {
@@ -95,10 +127,13 @@ const gameController = (() => {
        return currentPlayer;
     }
 
+    const getPlayers = () => players;
+
     return {
         changePlayer, 
         getCurrentPlayer, 
-        checkForGameOver 
+        checkForGameOver,
+        getPlayers
     };
 })();
 
@@ -124,11 +159,12 @@ const displayController = (() => {
     squares.forEach(square => {
         square.addEventListener('click', function(){
             if (this.innerHTML === '' && gameController.checkForGameOver())  {
-                this.innerHTML = gameController.getCurrentPlayer().symbol;
-
+                this.innerHTML = gameController.getCurrentPlayer().getSymbol();
+                
                 gameController.getCurrentPlayer().placeSymbol(Number(this.id));
                 gameController.checkForGameOver();
-                gameController.changePlayer();
+                gameController.getPlayers()[1].placeSymbol();
+                // gameController.changePlayer();
             }
         })
     })
