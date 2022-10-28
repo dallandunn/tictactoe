@@ -1,174 +1,192 @@
+// game board
 const gameBoard = (() => {
-    let board = new Array(9).fill('')
-    
-    const addSymbol = (symbol, location) => {
-        if(board[location] === '') {
-            board[location] = symbol;
-        }
+    let values = new Array(9).fill('');
+
+    const getValue = (index) => {
+        return values[index];
     }
 
-    const boardAtIndex = (index) => board[index];
-
-    const boardFull = () => !(board.includes(''));
-
-    const clear = () => board.fill('');
-
-    const checkCols = () => {
-        let threeInARow = false;
-        for (let i = 0; i < 3; i++) {
-            if (board[i] === board[i + 3] && board[i] === board[i + 6] && board[i] !== '') {
-                threeInARow = true;
-            } 
+    const setValue = (index, newValue) => {
+        if (!(gameController.gameOver()) && values[index] === '') {
+            values[index] = newValue;
         }
-        return threeInARow;
+        
     }
 
-    const checkRows = () => {
-        let threeInARow = false;
-        for (let i = 0; i < 7; i+=3) {
-            if (board[i] === board[i + 1] && board[i] === board[i + 2] && board[i] !== '') {
-                threeInARow = true;
-            }
-        }
-        return threeInARow;
-    }
+    const clear = () => values.fill('');
 
-    const checkDiagonals = () => {
-        let threeInARow = false
-        if (board[0] == board[4] && board[0] == board[8] && board[0] !== '') {
-            threeInARow = true;
-        } else if (board[2] == board[4] && board[2] == board[6] && board[2] !== '') {
-            threeInARow = true;
-        }
-        return threeInARow;
-    }
+    const getValues = () => values;
 
-
-    return { 
-        board, 
-        boardAtIndex, 
-        clear, 
-        addSymbol, 
-        boardFull, 
-        checkCols, 
-        checkRows, 
-        checkDiagonals 
+    return {
+        getValue,
+        setValue,
+        getValues,
+        clear
     };
 })();
 
-const Player = (symbol, name, playerType) => {
-
-    const placeSymbol = (index) => {
-        gameBoard.addSymbol(symbol, index);
+// player factory
+const Player = (name, symbol) => {
+    const getName = () => {
+        return name;
     }
 
-    const getSymbol = () => symbol;
+    const getSymbol = () => {
+        return symbol;
+    }
 
-    const getName = () => name;
-
-    return {getSymbol, getName, placeSymbol};
+    return {
+        getName,
+        getSymbol
+    };
 }
 
-const AI = (symbol, name, difficulty) => {
-    const {getName} = Player(symbol, name);
-    const {getSymbol} = Player(symbol, name);
+// AI player
+const AI = (name, symbol, difficulty) => {
+    const prototype = Player(name, symbol);
 
-    const placeSymbol = () => {
-        if (!(gameController.checkForGameOver())) {
-            return ''
-        }
-        const square = selectSquare(difficulty);
-        gameBoard.addSymbol(symbol, square);
-        document.getElementById(square.toString()).innerText = symbol;
-    }
-
-    const selectSquare = (difficulty) => {
+    const selectSquare = () => {
         let selection;
         if (difficulty === 'easy') {
+        // randomly select a space on the board
             do {
                 selection = Math.floor(Math.random()  *  10);
-            } while (gameBoard.boardAtIndex(selection) !== '');
+            } while (gameBoard.getValue(selection) !== '');
         }
-        
         return selection;
     }
 
-    return {placeSymbol, getName, getSymbol};
+    const placeSymbol = () => {
+        gameBoard.setValue(selectSquare(), symbol);
+        displayController.printBoard();
+    }
+
+    return Object.assign({}, prototype, {placeSymbol});
 }
 
+// game controller
 const gameController = (() => {
-    // let players = [Player('X', document.getElementById('x').value), Player('O', document.getElementById('o').value)];
-    let players = [Player('X', document.getElementById('x').value), AI('O', 'AI', 'easy')]
-    let currentPlayer = players[0];
+    const playerX = Player(document.getElementById('x').value, 'X');
+    const playerO = AI(document.getElementById('o').value, 'O', 'easy');
+    let currentPlayer = playerX;
+    const board = gameBoard.getValues();
+    let message = '';
+
+    // check if game board is full
+    const checkFull = () => !(board.includes(''));
+
+    // check for 3 in a row in columns
+    const checkCols = () => {
+        for (let i = 0; i < 3; i++) {
+            if (board[i] === board[i + 3] && board[i] === board[i + 6] && board[i] !== '') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // check for 3 in a row in rows
+    const checkRows = () => {
+        for (let i = 0; i < 7; i+=3) {
+            if (board[i] === board[i + 1] && board[i] === board[i + 2] && board[i] !== '') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // chekc for 3 in a row in diagonals
+    const checkDiagonals = () => {
+        if (board[0] == board[4] && board[0] == board[8] && board[0] !== '') {
+            return true;
+        } else if (board[2] == board[4] && board[2] == board[6] && board[2] !== '') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // check for game over
+    const gameOver = () => {
+        if (checkRows() || checkCols() || checkDiagonals()) {
+            message = `${currentPlayer.getName()} Wins!`;
+            return true;
+        } else if (checkFull()) {
+            message = 'Game Over. It is a Tie.'
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     const changePlayer = () => {
-        if (currentPlayer === players[0]) {
-            currentPlayer = players[1];
+        if (currentPlayer.getSymbol() === 'X') {
+            currentPlayer = playerO;
         } else {
-            currentPlayer = players[0];
-        }
-    }
-    
-    const checkForGameOver = () => {
-        if (gameBoard.checkCols() || gameBoard.checkRows() || gameBoard.checkDiagonals()) {
-            displayController.displayWinner(currentPlayer.getName() + ' is the Winner!');
-            currentPlayer = players[0];
-            return false;
-        } else if (gameBoard.boardFull()) {
-            displayController.displayWinner("Game Over. It's a tie.");
-            currentPlayer = players[0];
-            return false;
-        } else {
-            return true;
+            currentPlayer = playerX;
         }
     }
 
-    const getCurrentPlayer = () => {
-       return currentPlayer;
+    const playRound = () => {
+        if (gameOver()) {
+            displayController.displayWinner(message);
+        } else {
+            // changePlayer();
+            playerO.placeSymbol();
+        }
+        
     }
 
-    const getPlayers = () => players;
+    const getCurrentPlayer = () => currentPlayer.getSymbol();
 
     return {
-        changePlayer, 
-        getCurrentPlayer, 
-        checkForGameOver,
-        getPlayers
+        gameOver,
+        getCurrentPlayer,
+        playRound
     };
 })();
 
+// display controller
 const displayController = (() => {
-    const squares = document.querySelectorAll('.square');
-    const reset = document.getElementById('reset');
+    const board = Array.from(document.querySelectorAll('.square'));
     const winner = document.getElementById('winner');
+    const resetButton = document.getElementById('reset');
+
+    // clear HTML game board
+    const reset = () => {
+        resetButton.innerText = 'Reset';
+        winner.innerText = '';
+        gameBoard.clear();
+        printBoard();
+    }
+
+    resetButton.addEventListener('click', reset);
+
+    // display board in HTML
+    const printBoard = () => {
+        for (let i = 0; i < board.length; i++) {
+            if (gameBoard.getValue() !== '') {
+                board[i].innerText = gameBoard.getValue(i);
+            }
+        }
+    }
 
     const displayWinner = (message) => {
         winner.innerText = message;
-        reset.innerText = 'Play Again'
+        resetButton.innerText = 'Play Again';
     }
 
-    reset.addEventListener('click', () => {
-        gameBoard.clear();
-        displayWinner(' ');
-        reset.innerHTML = 'Reset'
-        squares.forEach(square => {
-            square.innerHTML = '';
-        })
-    });
-
-    squares.forEach(square => {
+    board.forEach(square => {
         square.addEventListener('click', function(){
-            if (this.innerHTML === '' && gameController.checkForGameOver())  {
-                this.innerHTML = gameController.getCurrentPlayer().getSymbol();
-                
-                gameController.getCurrentPlayer().placeSymbol(Number(this.id));
-                gameController.checkForGameOver();
-                gameController.getPlayers()[1].placeSymbol();
-                // gameController.changePlayer();
-            }
+            gameBoard.setValue(this.id, gameController.getCurrentPlayer());
+            gameController.playRound();
+            printBoard();
         })
     })
+
     return {
+        printBoard,
         displayWinner
     };
+
 })();
