@@ -43,15 +43,21 @@ body {
     width: 100px;
     text-align: center;
     font-size: 90px;
-    cursor: pointer;
+    cursor: default;
     border: 3px solid white;
 }
 
-.square:hover {
-    background-color: rgba(255, 255, 255, 0.5);
+.selected {
+    background-color: rgba(255, 255, 255, 0.4);
     -webkit-box-shadow:0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     -moz-box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
     box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+}
+
+label[for=num-players] {
+    color: white;
 }
 
 #winner {

@@ -133,13 +133,25 @@ const AI = (name, symbol, opponent, accuarcy) => {
         board.setValue(selectSquare(), symbol);
     }
 
-    return Object.assign({}, prototype, {placeSymbol});
+    const changeAccuarcy = (newAccuracy) => {
+        accuarcy = newAccuracy;
+    }
+
+    return Object.assign({}, prototype, {placeSymbol, changeAccuarcy});
 }
 
 // game controller
 const gameController = (() => {
     const playerX = Player(document.getElementById('x').value, 'X');
-    const playerO = AI(document.getElementById('o').value, 'O', playerX, 1);
+    let playerO;
+    let twoPlayers = document.getElementById('num-players').checked;
+
+    if (twoPlayers) {
+         playerO = Player(document.getElementById('o').value, 'O');
+    } else {
+         playerO = AI(document.getElementById('o').value, 'O', playerX, 0.25);
+    }
+    
     let currentPlayer = playerX;
     const board = gameBoard.getValues();
     let message = '';
@@ -194,9 +206,9 @@ const gameController = (() => {
     const gameOver = () => {
         if (checkRows(board) || checkCols(board) || checkDiagonals(board)) {
             message = `${currentPlayer.getName()} Wins!`;
-            return true
+            return true;
         } else if (checkFull(board)) {
-            message = 'Game Over. It is a Tie.'
+            message = 'Game Over. It is a Tie.';
             return true;
         } else {
             return false;
@@ -211,18 +223,41 @@ const gameController = (() => {
         }
     }
 
+    const changeNumPlayers = (newValue) => {
+        twoPlayers = newValue;
+    }
+
+    const changeAIAccuarcy = (newAccuracy) => {
+        switch(newAccuracy){
+            case 'impossible':
+                playerO.changeAccuarcy(1);
+                break;
+            case 'hard':
+                playerO.changeAccuarcy(0.9);
+                break;
+            case 'medium':
+                playerO.changeAccuarcy(0.6);
+                break;
+            default:
+                playerO.changeAccuarcy(0.25);
+        }
+    }
+
     const playRound = () => {
         if (gameOver()) {
             displayController.displayWinner(message);
         } else {
-            changePlayer();
-            playerO.placeSymbol();
-            displayController.printBoard();
-            if (gameOver()) {
-                displayController.displayWinner(message);
+            if (twoPlayers) {
+                changePlayer();
+            } else {
+                changePlayer();
+                playerO.placeSymbol();
+                displayController.printBoard();
+                if (gameOver()) {
+                    displayController.displayWinner(message);
+                }
+                changePlayer();
             }
-            changePlayer();
-            
         }
         
     }
@@ -234,7 +269,9 @@ const gameController = (() => {
         getCurrentPlayer,
         playRound,
         checkFull,
-        getWinnerSymbol
+        getWinnerSymbol,
+        changeAIAccuarcy,
+        changeNumPlayers
     };
 })();
 
@@ -243,6 +280,8 @@ const displayController = (() => {
     const board = Array.from(document.querySelectorAll('.square'));
     const winner = document.getElementById('winner');
     const resetButton = document.getElementById('reset');
+    const multiplayer = document.getElementById('num-players');
+    const difficulty = document.getElementById('difficulty');
 
     // clear HTML game board
     const reset = () => {
@@ -254,6 +293,23 @@ const displayController = (() => {
 
     resetButton.addEventListener('click', reset);
 
+    // change number of players
+    multiplayer.addEventListener('change', function() {
+        reset();
+        gameController.changeNumPlayers(multiplayer.checked);
+       if (multiplayer.checked) {
+            difficulty.style.display = 'none';
+       } else {
+            difficulty.style.display = 'block';
+       }
+    });
+
+    // change ai difficulty
+    difficulty.addEventListener('change', function() {
+        gameController.changeAIAccuarcy(difficulty.value);
+        reset();
+    });
+
     // display board in HTML
     const printBoard = () => {
         for (let i = 0; i < board.length; i++) {
@@ -263,11 +319,13 @@ const displayController = (() => {
         }
     }
 
+    // display winning message
     const displayWinner = (message) => {
         winner.innerText = message;
         resetButton.innerText = 'Play Again';
     }
 
+    // square mouse over, mouse out, and click events
     board.forEach(square => {
         square.addEventListener('mouseover', function() {
             if (gameBoard.isOpen(this.id) && !(gameController.gameOver())) {
@@ -295,7 +353,8 @@ const displayController = (() => {
 
     return {
         printBoard,
-        displayWinner
+        displayWinner,
+        reset
     };
 
 })();
