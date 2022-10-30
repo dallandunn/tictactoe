@@ -142,14 +142,14 @@ const AI = (name, symbol, opponent, accuarcy) => {
 
 // game controller
 const gameController = (() => {
-    const playerX = Player(document.getElementById('x').value, 'X');
+    const playerX = Player('X', 'X');
     let playerO;
     let twoPlayers = document.getElementById('num-players').checked;
 
     if (twoPlayers) {
-         playerO = Player(document.getElementById('o').value, 'O');
+         playerO = Player('O', 'O');
     } else {
-         playerO = AI(document.getElementById('o').value, 'O', playerX, 0.25);
+         playerO = AI('O', 'O', playerX, 0.25);
     }
     
     let currentPlayer = playerX;
@@ -225,6 +225,11 @@ const gameController = (() => {
 
     const changeNumPlayers = (newValue) => {
         twoPlayers = newValue;
+        if (twoPlayers) {
+            playerO = Player('O', 'O');
+       } else {
+            playerO = AI('O', 'O', playerX, 0.25);
+       }
     }
 
     const changeAIAccuarcy = (newAccuracy) => {
@@ -282,6 +287,7 @@ const displayController = (() => {
     const resetButton = document.getElementById('reset');
     const multiplayer = document.getElementById('num-players');
     const difficulty = document.getElementById('difficulty');
+    const label = document.getElementById('difficulty-label');
 
     // clear HTML game board
     const reset = () => {
@@ -299,8 +305,10 @@ const displayController = (() => {
         gameController.changeNumPlayers(multiplayer.checked);
        if (multiplayer.checked) {
             difficulty.style.display = 'none';
+            label.style.display = 'none';
        } else {
-            difficulty.style.display = 'block';
+            difficulty.style.display = 'inline';
+            label.style.display = 'inline';
        }
     });
 

@@ -9,28 +9,22 @@
     <title>Tic-Tac-Toe | The Odin Project</title>
 </head>
 <body>
-    <div class="players">
-        <div class="player-name">
-            <label for="x">X</label>
-            <input type="text" name="x" id="x" value="Player 1">
-        </div>
-        
-        <div class="player-name">
-            <label for="o">O</label>
-            <input type="text" name="o" id="o" value="Player 2">
-        </div>
-    </div>
-
     <div class="options">
-        <input type="checkbox" name="num-players" id="num-players">
-        <label for="num-players">Two players</label>
+        <label class="toggle">
+            <input type="checkbox" id="num-players" checked>
+            <span class="labels" data-on="2 Players" data-off="1 Player"></span>
+        </label>
+        <br>
 
-        <select name="difficulty" id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-            <option value="impossible">Impossible</option>
-        </select>
+        <div class="ai-options">
+            <label for="difficulty" id="difficulty-label">AI difficulty</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="impossible">Impossible</option>
+            </select>
+        </div>
     </div>
 
     <p id="winner"></p>
