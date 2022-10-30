@@ -267,6 +267,12 @@ const gameController = (() => {
         
     }
 
+    const newGame = () => {
+        if (getCurrentPlayer() === 'O') {
+            changePlayer();
+        }
+    }
+
     const getCurrentPlayer = () => currentPlayer.getSymbol();
 
     return {
@@ -276,7 +282,8 @@ const gameController = (() => {
         checkFull,
         getWinnerSymbol,
         changeAIAccuarcy,
-        changeNumPlayers
+        changeNumPlayers,
+        newGame
     };
 })();
 
@@ -292,6 +299,7 @@ const displayController = (() => {
     // clear HTML game board
     const reset = () => {
         resetButton.innerText = 'Reset';
+        gameController.newGame();
         winner.innerText = '';
         gameBoard.clear();
         printBoard();
@@ -304,11 +312,15 @@ const displayController = (() => {
         reset();
         gameController.changeNumPlayers(multiplayer.checked);
        if (multiplayer.checked) {
-            difficulty.style.display = 'none';
-            label.style.display = 'none';
+            difficulty.classList.remove('show');
+            label.classList.remove('show');
+            // difficulty.style.opacity = 0;
+            // label.style.opacity = 0;
        } else {
-            difficulty.style.display = 'inline';
-            label.style.display = 'inline';
+            // difficulty.style.opacity = 1;
+            // label.style.opacity = 1;
+            difficulty.classList.add('show');
+            label.classList.add('show');
        }
     });
 

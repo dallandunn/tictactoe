@@ -1,42 +1,74 @@
 html {
     margin: 0;
     padding: 0;
+    background-image: url("forest.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
 }
 
 div {
-    /* border: 1px solid white; */
     margin: 0;
-    color: white;
+    color: #CAD2C5;
 }
 
 body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: black;
     flex-direction: column;
+    
+}
+
+h1 {
+    font-size: 60px;
+    color: #CAD2C5;
+    text-shadow: 4px 4px #2F3E46;
 }
 
 #board {
     display: grid;
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 100px);
     grid-template-columns: repeat(3, 100px);
-    margin-top: 50px;
-    color: white;
+    color: #CAD2C5;
+    justify-content: center;
+    align-content: center;
+    margin-bottom: 50px;
+    text-shadow: 4px 4px #2F3E46;
+}
+
+.game {
+    height: 700px;
+    width: 50%;
+    background-color: rgba(82, 121, 111, 0.4);
+    border: 2px solid #CAD2C5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 20px;
 }
 
 #reset {
-    margin-top: 100px;
     width: 150px;
     height: 50px;
     font-size: 1.5rem;
-    background-color: white;
+    background-color: #CAD2C5;
+    border: none;
+    box-shadow: none;
+    border-radius: 50px;
+    color: #2F3E46;
+    box-shadow: 5px 5px #2F3E46;
 }
 
 #reset:hover {
-    -webkit-box-shadow:0px 0px 41px 0px rgba(255, 255, 255, 0.75);
-    -moz-box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
-    box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
+    -webkit-box-shadow:0px 0px 41px 0px rgba(132, 169, 140, 0.75);
+    -moz-box-shadow: 0px 0px 41px 0px rgba(132, 169, 140, 0.75);
+    box-shadow: 0px 0px 41px 0px rgba(132, 169, 140, 0.75);
+    background-color: #84A98C;
+    transform: scale(1.1);
+    transition: transform 0.2s ease-in-out;
 }
 
 .square {
@@ -45,24 +77,28 @@ body {
     text-align: center;
     font-size: 90px;
     cursor: default;
-    border: 3px solid white;
+    border: 5px solid #CAD2C5;
 }
 
 .selected {
-    background-color: rgba(255, 255, 255, 0.4);
-    -webkit-box-shadow:0px 0px 41px 0px rgba(255, 255, 255, 0.75);
-    -moz-box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
-    box-shadow: 0px 0px 41px 0px rgba(255, 255, 255, 0.75);
-    color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(202, 210, 197, 0.4);
+    -webkit-box-shadow:0px 0px 41px 0px (132, 169, 140, 0.75);
+    -moz-box-shadow: 0px 0px 41px 0px rgba(132, 169, 140, 0.75);
+    box-shadow: 0px 0px 41px 0px rgba(132, 169, 140, 0.75);
+    color: rgba(202, 210, 197, 0.3);
     cursor: pointer;
+    text-shadow: none;
 }
 
 .toggle {
     position: relative;
     display: inline-block;
-    width: 80px;
-    height: 27px;
+    width: 200px;
+    height: 53px;
     cursor: pointer;
+    font-size: 24px;
+    font-weight: 600;
+    
 }
 
 .toggle input {
@@ -75,8 +111,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    transition: all 0.4s ease-in-out;
+    transition: all 0.3s ease-in-out;
     overflow: hidden;
+    border-radius: 50px;
+    box-shadow: 2px 2px #2F3E46;
 }
 
 .toggle .labels::after {
@@ -89,10 +127,9 @@ body {
     left: 0;
     height: 100%;
     width: 100%;
-    color: #4d4d4d;
-    background-color: #ffff;
-    transition: all 0.4s ease-in-out;
-    border-radius: 5px;
+    color: #2F3E46;
+    background-color: rgba(202, 210, 197, 0.9);
+    transition: all 0.3s ease-in-out;
 }
 
 .toggle .labels::before {
@@ -102,38 +139,76 @@ body {
     justify-content: center;
     align-items: center;
     top: 0;
-    left: -80px;
+    left: -200px;
     height: 100%;
     width: 100%;
-    color: #4d4d4d;
-    background-color: #ffff;
+    color: #CAD2C5;
+    background-color: rgba(82, 121, 111, 0.8);
     text-align: center;
-    transition: all 0.4s ease-in-out;
-    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
 }
 
 .toggle input:checked~.labels::after {
-    transform: translateX(80px);
+    transform: translateX(200px);
 }
 
 .toggle input:checked~.labels::before {
-    transform: translateX(80px);
+    transform: translateX(200px);
 }
 
-#difficulty, #difficulty-label {
-    display: none;
+.label, select {
+    opacity: 0;
+    position: absolute;
+    top: -50px;
+}
+
+.show {
+    transition: all 0.4s ease-in-out;
+    opacity: 1;
+    position: relative;
+    top: 0px;
+}
+
+.options {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 50%;
+    margin-bottom: 10px;
+    height: 50px;
+    align-items: center;
 }
 
 .ai-options {
-    margin-top: 20px;
+    margin-left: 20px;
     display: flex;
     flex-direction: column;
 }
 
 #winner {
-    font-size: 48px;
-    color: white;
-    height: 50px;
+    font-size: 55px;
+    color: #CAD2C5;
+    height: 55px;
+    text-shadow: 4px 4px #2F3E46;
+}
+
+select {
+    color: #CAD2C5;
+    background-color: rgba(82, 121, 111, 0.4);
+    box-shadow: 4px 4px #2F3E46;
+    border: 1px solid #CAD2C5;
+    width: 130px;
+    height: 25px;
+    margin-top: 2px;
+    font-size: 16px;
+}
+
+.ai-options label {
+    font-size: 20px;
+}
+
+select:focus {
+    outline: none;
 }
 
 .top {
@@ -142,6 +217,7 @@ body {
 
 .bottom {
     border-bottom: none;
+    border-top: none;
 }
 
 .left {
@@ -154,7 +230,6 @@ body {
 
 .middle {
     border-top: none;
-    border-bottom: none;
 }
 
 .center {
