@@ -7,21 +7,26 @@ const gameBoard = (() => {
     }
 
     const setValue = (index, newValue) => {
-        if (!(gameController.gameOver()) && values[index] === '') {
-            values[index] = newValue;
-        }
-        
+        // if (!(gameController.gameOver()) && values[index] === '') {
+        //     values[index] = newValue;
+        // }
+        values[index] = newValue;
     }
 
     const clear = () => values.fill('');
 
     const getValues = () => values;
 
+    const isOpen = (index) => {
+        return getValue(index) === '';
+    }
+
     return {
         getValue,
         setValue,
         getValues,
-        clear
+        clear,
+        isOpen
     };
 })();
 
@@ -42,23 +47,90 @@ const Player = (name, symbol) => {
 }
 
 // AI player
-const AI = (name, symbol, difficulty) => {
+const AI = (name, symbol, opponent, accuarcy) => {
     const prototype = Player(name, symbol);
+    const board = gameBoard;
+    const minimax = (board, depth, isMax) => {
+        let score = evaluate(board.getValues());
+        if (Math.abs(score) === 10 ) return score;
+
+        if (gameController.checkFull(board.getValues())) return 0;
+
+        if (isMax) {
+            let best = -Infinity;
+
+            for (let i = 0; i < board.getValues().length; i++) {
+                if (board.isOpen(i)) {
+                    board.setValue(i, symbol);
+                    best = Math.max(best, minimax(board, depth + 1, !isMax));
+                    board.setValue(i, '');
+                }
+            }
+            // console.log(`Move ${best}; Board - ${board.getValues()}`);
+            return best;
+        } else {
+            let best = Infinity;
+
+            for (let i = 0; i < board.getValues().length; i++) {
+                if (board.isOpen(i)) {
+                    board.setValue(i, opponent.getSymbol());
+                    best = Math.min(best, minimax(board, depth + 1, !isMax))
+                    board.setValue(i, '');
+                }
+            }
+            return best;
+        }
+    }
+
+    const getBestMove = (board) => {
+        let bestValue = -Infinity;
+        var bestMove = -1;
+        for (let i = 0; i < board.getValues().length; i++) {
+            if (board.isOpen(i)) {
+                board.setValue(i, symbol);
+                let currentValue = minimax(board, 0, false);
+                board.setValue(i, '');
+
+                if (currentValue > bestValue) {
+                    bestMove = i;
+                    bestValue = currentValue;
+                }
+            }
+        }
+        // console.log(`The Best Move is: ${bestMove}`);
+        return bestMove;
+    }
+
+    const evaluate = (board) => {
+        let winner = gameController.getWinnerSymbol(board);
+        if (winner) {
+            if (winner === symbol) {
+                return 10;
+            } else {
+                return -10;
+            }
+        } else {
+            return 0;
+        }
+    }
 
     const selectSquare = () => {
         let selection;
-        if (difficulty === 'easy') {
+        let rand = Math.random() > accuarcy;
+        if (rand) {
         // randomly select a space on the board
             do {
                 selection = Math.floor(Math.random()  *  10);
-            } while (gameBoard.getValue(selection) !== '');
+            } while (board.getValue(selection) !== '');
+        } else {
+        // use minimax 
+            selection = getBestMove(board);
         }
         return selection;
     }
 
     const placeSymbol = () => {
-        gameBoard.setValue(selectSquare(), symbol);
-        displayController.printBoard();
+        board.setValue(selectSquare(), symbol);
     }
 
     return Object.assign({}, prototype, {placeSymbol});
@@ -67,51 +139,63 @@ const AI = (name, symbol, difficulty) => {
 // game controller
 const gameController = (() => {
     const playerX = Player(document.getElementById('x').value, 'X');
-    const playerO = AI(document.getElementById('o').value, 'O', 'easy');
+    const playerO = AI(document.getElementById('o').value, 'O', playerX, 1);
     let currentPlayer = playerX;
     const board = gameBoard.getValues();
     let message = '';
 
     // check if game board is full
-    const checkFull = () => !(board.includes(''));
+    const checkFull = (board) => !(board.includes(''));
 
     // check for 3 in a row in columns
-    const checkCols = () => {
+    const checkCols = (board) => {
         for (let i = 0; i < 3; i++) {
             if (board[i] === board[i + 3] && board[i] === board[i + 6] && board[i] !== '') {
-                return true;
+                return board[i];
             }
         }
         return false;
     }
 
     // check for 3 in a row in rows
-    const checkRows = () => {
+    const checkRows = (board) => {
         for (let i = 0; i < 7; i+=3) {
             if (board[i] === board[i + 1] && board[i] === board[i + 2] && board[i] !== '') {
-                return true;
+                return board[i];
             }
         }
         return false;
     }
 
     // chekc for 3 in a row in diagonals
-    const checkDiagonals = () => {
+    const checkDiagonals = (board) => {
         if (board[0] == board[4] && board[0] == board[8] && board[0] !== '') {
-            return true;
+            return true, board[0];
         } else if (board[2] == board[4] && board[2] == board[6] && board[2] !== '') {
-            return true;
+            return board[2];
         } else {
             return false;
         }
     }
 
+    // check for winner
+    const getWinnerSymbol = (board) => {
+        if (checkRows(board)) {
+            return checkRows(board);
+        } else if (checkCols(board)) {
+            return checkCols(board);
+        } else if (checkDiagonals(board)) {
+            return checkDiagonals(board);
+        } else {
+            return false;
+        }
+    }
     // check for game over
     const gameOver = () => {
-        if (checkRows() || checkCols() || checkDiagonals()) {
+        if (checkRows(board) || checkCols(board) || checkDiagonals(board)) {
             message = `${currentPlayer.getName()} Wins!`;
-            return true;
-        } else if (checkFull()) {
+            return true
+        } else if (checkFull(board)) {
             message = 'Game Over. It is a Tie.'
             return true;
         } else {
@@ -131,8 +215,14 @@ const gameController = (() => {
         if (gameOver()) {
             displayController.displayWinner(message);
         } else {
-            // changePlayer();
+            changePlayer();
             playerO.placeSymbol();
+            displayController.printBoard();
+            if (gameOver()) {
+                displayController.displayWinner(message);
+            }
+            changePlayer();
+            
         }
         
     }
@@ -142,7 +232,9 @@ const gameController = (() => {
     return {
         gameOver,
         getCurrentPlayer,
-        playRound
+        playRound,
+        checkFull,
+        getWinnerSymbol
     };
 })();
 
@@ -177,11 +269,28 @@ const displayController = (() => {
     }
 
     board.forEach(square => {
+        square.addEventListener('mouseover', function() {
+            if (gameBoard.isOpen(this.id) && !(gameController.gameOver())) {
+                square.innerText = gameController.getCurrentPlayer();
+                square.classList.add('selected');
+            }
+        });
+
+        square.addEventListener('mouseout', function() {
+            if (gameBoard.isOpen(this.id) && !(gameController.gameOver())) {
+                square.innerText = '';
+                square.classList.remove('selected')
+            }
+        });
+
         square.addEventListener('click', function(){
-            gameBoard.setValue(this.id, gameController.getCurrentPlayer());
-            gameController.playRound();
-            printBoard();
-        })
+            if (gameBoard.isOpen(this.id) && !(gameController.gameOver())) {
+                square.classList.remove('selected')
+                gameBoard.setValue(this.id, gameController.getCurrentPlayer());
+                printBoard();
+                gameController.playRound();
+            }
+        });
     })
 
     return {
