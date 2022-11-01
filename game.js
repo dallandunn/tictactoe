@@ -66,7 +66,6 @@ const AI = (name, symbol, opponent, accuarcy) => {
                     board.setValue(i, '');
                 }
             }
-            // console.log(`Move ${best}; Board - ${board.getValues()}`);
             return best;
         } else {
             let best = Infinity;
@@ -101,9 +100,10 @@ const AI = (name, symbol, opponent, accuarcy) => {
         return bestMove;
     }
 
-    const evaluate = (board) => {
+    const evaluate = (board, depth) => {
         let winner = gameController.getWinnerSymbol(board);
         if (winner) {
+            displayController.changeColor('', Array.from(Array(9).keys()))
             if (winner === symbol) {
                 return 10;
             } else {
@@ -155,6 +155,7 @@ const gameController = (() => {
     let currentPlayer = playerX;
     const board = gameBoard.getValues();
     let message = '';
+    let winColor = '#84A98C';
 
     // check if game board is full
     const checkFull = (board) => !(board.includes(''));
@@ -163,6 +164,7 @@ const gameController = (() => {
     const checkCols = (board) => {
         for (let i = 0; i < 3; i++) {
             if (board[i] === board[i + 3] && board[i] === board[i + 6] && board[i] !== '') {
+                displayController.changeColor(winColor, [i, i + 3, i + 6]);
                 return board[i];
             }
         }
@@ -173,6 +175,7 @@ const gameController = (() => {
     const checkRows = (board) => {
         for (let i = 0; i < 7; i+=3) {
             if (board[i] === board[i + 1] && board[i] === board[i + 2] && board[i] !== '') {
+                displayController.changeColor(winColor, [i, i + 1, i + 2]);
                 return board[i];
             }
         }
@@ -182,8 +185,10 @@ const gameController = (() => {
     // chekc for 3 in a row in diagonals
     const checkDiagonals = (board) => {
         if (board[0] == board[4] && board[0] == board[8] && board[0] !== '') {
+            displayController.changeColor(winColor, [0, 4, 8]);
             return true, board[0];
         } else if (board[2] == board[4] && board[2] == board[6] && board[2] !== '') {
+            displayController.changeColor(winColor, [2, 4, 6]);
             return board[2];
         } else {
             return false;
@@ -298,11 +303,19 @@ const displayController = (() => {
 
     // clear HTML game board
     const reset = () => {
+        changeColor('', Array.from(Array(9).keys()))
         resetButton.innerText = 'Reset';
         gameController.newGame();
         winner.innerText = '';
         gameBoard.clear();
         printBoard();
+    }
+
+    // change the color of squares
+    const changeColor = (newColor, squares) => {
+        for (let i = 0; i < squares.length; i++) {
+            document.getElementById(squares[i]).style.color = newColor;
+        }
     }
 
     resetButton.addEventListener('click', reset);
@@ -314,11 +327,7 @@ const displayController = (() => {
        if (multiplayer.checked) {
             difficulty.classList.remove('show');
             label.classList.remove('show');
-            // difficulty.style.opacity = 0;
-            // label.style.opacity = 0;
        } else {
-            // difficulty.style.opacity = 1;
-            // label.style.opacity = 1;
             difficulty.classList.add('show');
             label.classList.add('show');
        }
@@ -374,7 +383,8 @@ const displayController = (() => {
     return {
         printBoard,
         displayWinner,
-        reset
+        reset,
+        changeColor
     };
 
 })();
